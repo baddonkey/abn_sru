@@ -11,6 +11,7 @@ This repository hosts a pure vanilla JavaScript widget that fetches and displays
 
 ## Technical Constraints
 - Do not introduce build tools, transpilers, or package dependencies unless explicitly requested.
+- Do not use Node.js or run `node` commands in this repository.
 - Keep SRU integration in `js/sru-widget.js` and runtime settings in `js/config.js`.
 - Parse XML using namespace-safe local-name lookups.
 - Keep UI logic and fetch logic separate.

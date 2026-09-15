@@ -11,5 +11,5 @@ window.SRU_CONFIG = {
   displayLimit: 1000,
   startRecord: 1,
   sortBy: "",
-  timeoutMs: 12000
+  timeoutMs: 60000
 };
