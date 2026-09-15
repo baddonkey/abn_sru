@@ -69,3 +69,5 @@ Then open http://localhost:5500 in your browser.
 - Some SRU servers block browser-origin requests without CORS headers. If requests fail, verify CORS support on the SRU endpoint.
 - XML fields differ across catalogs. If needed, adjust parsing in `js/sru-widget.js`.
 - The ABN endpoint supports server-side sorting by `alma.main_pub_date`, `alma.creator`, and `alma.title`. Local field 990 is searchable but not sortable, so the timeline filter cannot be ordered by its 990 accession code on the server.
+
+Test commit.
