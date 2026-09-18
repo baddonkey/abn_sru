@@ -5,8 +5,10 @@
   const listNode = document.getElementById("book-list");
   const refreshButton = document.getElementById("refresh-button");
   const librarySelect = document.getElementById("library-filter");
-  const monthSlider = document.getElementById("month-filter");
+  const monthStartSlider = document.getElementById("month-filter-start");
+  const monthEndSlider = document.getElementById("month-filter-end");
   const monthValue = document.getElementById("month-filter-value");
+  const monthRangeInputs = document.querySelector(".month-range-inputs");
   const supportsIntersectionObserver = typeof IntersectionObserver !== "undefined";
 
   let libraries = [];
@@ -21,19 +23,53 @@
 
   function setControlsDisabled(disabled) {
     librarySelect.disabled = disabled;
-    monthSlider.disabled = disabled;
+    monthStartSlider.disabled = disabled;
+    monthEndSlider.disabled = disabled;
     refreshButton.disabled = disabled;
   }
 
-  function getMonthLabel(monthCount) {
-    return monthCount === 1 ? "Aktueller Monat" : `Letzte ${monthCount} Monate`;
+  function formatMonthOffset(offset) {
+    const today = new Date();
+    const date = new Date(today.getFullYear(), today.getMonth() - offset, 1);
+
+    return new Intl.DateTimeFormat("de-CH", {
+      month: "long",
+      year: "numeric"
+    }).format(date);
   }
 
-  function updateMonthSliderLabel() {
-    const monthCount = Number(monthSlider.value) || 1;
-    const label = getMonthLabel(monthCount);
+  function getMonthRange() {
+    return {
+      start: Number(monthStartSlider.value) || 0,
+      end: Number(monthEndSlider.value) || 0
+    };
+  }
+
+  function getMonthRangeLabel() {
+    const { start, end } = getMonthRange();
+    const startLabel = formatMonthOffset(start);
+    return start === end ? startLabel : `${startLabel} – ${formatMonthOffset(end)}`;
+  }
+
+  function updateMonthRange(changedSlider) {
+    let { start, end } = getMonthRange();
+
+    if (start > end) {
+      if (changedSlider === monthStartSlider) {
+        end = start;
+        monthEndSlider.value = String(end);
+      } else {
+        start = end;
+        monthStartSlider.value = String(start);
+      }
+    }
+
+    const label = getMonthRangeLabel();
     monthValue.textContent = label;
-    monthSlider.setAttribute("aria-valuetext", label);
+    monthStartSlider.setAttribute("aria-valuetext", formatMonthOffset(start));
+    monthEndSlider.setAttribute("aria-valuetext", formatMonthOffset(end));
+    monthRangeInputs.style.setProperty("--range-start", `${(start / 11) * 100}%`);
+    monthRangeInputs.style.setProperty("--range-end", `${(end / 11) * 100}%`);
   }
 
   function getSelectedLibrary() {
@@ -42,6 +78,7 @@
 
   function buildRequestConfig() {
     const selectedLibrary = getSelectedLibrary();
+    const monthRange = getMonthRange();
     const filterCode = selectedLibrary
       ? selectedLibrary.filterShort || selectedLibrary.short
       : "*";
@@ -51,7 +88,8 @@
       searchScope: selectedLibrary ? selectedLibrary.scope : "",
       tab: selectedLibrary ? selectedLibrary.scope : "",
       accessionPrefix: `NEL${filterCode}`,
-      recentMonthCount: Number(monthSlider.value) || 1
+      recentMonthStartOffset: monthRange.start,
+      recentMonthCount: monthRange.end - monthRange.start + 1
     };
   }
 
@@ -60,10 +98,7 @@
     const libraryName = selectedLibrary
       ? selectedLibrary.name
       : "Alle Bibliotheken (ABN)";
-    const monthCount = Number(monthSlider.value) || 1;
-    const monthLabel = monthCount === 1 ? "aktueller Monat" : `letzte ${monthCount} Monate`;
-
-    return `${libraryName}, ${monthLabel}`;
+    return `${libraryName}, ${getMonthRangeLabel()}`;
   }
 
   function clearObserver() {
@@ -224,18 +259,23 @@
       ? configuredScope
       : "";
 
-    const configuredMonthCount = Math.min(
-      12,
-      Math.max(1, Number(window.SRU_CONFIG.recentMonthCount) || 1)
+    const configuredStartOffset = Math.min(
+      11,
+      Math.max(0, Number(window.SRU_CONFIG.recentMonthStartOffset) || 0)
     );
-    monthSlider.value = String(configuredMonthCount);
-    updateMonthSliderLabel();
+    const configuredMonthCount = Math.max(1, Number(window.SRU_CONFIG.recentMonthCount) || 1);
+    const configuredEndOffset = Math.min(11, configuredStartOffset + configuredMonthCount - 1);
+    monthStartSlider.value = String(configuredStartOffset);
+    monthEndSlider.value = String(configuredEndOffset);
+    updateMonthRange();
   }
 
   refreshButton.addEventListener("click", load);
   librarySelect.addEventListener("change", load);
-  monthSlider.addEventListener("input", updateMonthSliderLabel);
-  monthSlider.addEventListener("change", load);
+  [monthStartSlider, monthEndSlider].forEach((slider) => {
+    slider.addEventListener("input", () => updateMonthRange(slider));
+    slider.addEventListener("change", load);
+  });
 
   try {
     initializeFilters();

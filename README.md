@@ -26,7 +26,8 @@ Edit `js/config.js`:
 - `searchScope`: optional discovery scope (for ABN for example `ABN_AKB`, `ABN_HFGS`, `ABN_AKS`)
 - `tab`: optional discovery tab value, usually same as `searchScope`
 - `vid`: optional discovery view ID
-- `recentMonthCount`: how many months to include, default `1` (current month)
+- `recentMonthStartOffset`: first month to include, counted backwards from the current month (`0`)
+- `recentMonthCount`: how many months to include from that point, default `1`
 - `sruPageSize`: how many records to request per page
 - `displayLimit`: maximum number of records to render
 
@@ -36,6 +37,7 @@ Default values are preconfigured for swisscovery ABN:
 - `searchScope`: empty (all ABN libraries)
 - `tab`: empty (all ABN libraries)
 - `vid`: `41SLSP_ABN:ABN`
+- `recentMonthStartOffset`: `0`
 - `recentMonthCount`: `1`
 - `sruPageSize`: `50`
 - `displayLimit`: `1000`
@@ -50,7 +52,7 @@ The widget loads matching MARC records in pages of 50 and renders up to 1000 rec
 
 For records with an ISBN in MARC field `020$a`, the widget loads a cover from Open Library. ISBN qualifiers such as `(hbk.)` are ignored, and the cover area is hidden when Open Library has no image.
 
-The **Bibliothek** filter offers all ABN libraries or one individual library. The **Zeitraum** filter includes the current month plus up to 11 preceding months. In the all-library view, the widget uses the SRU wildcard query `alma.local_field_990 all "NEL*YYMM"` for each selected month. An individual library uses an exact code such as `alma.local_field_990=NELAKBYYMM`.
+The **Bibliothek** filter offers all ABN libraries or one individual library. The **Zeitraum** range filter selects any continuous span within the current month and the 11 preceding months. In the all-library view, the widget uses the SRU wildcard query `alma.local_field_990 all "NEL*YYMM"` for each selected month. An individual library uses an exact code such as `alma.local_field_990=NELAKBYYMM`.
 
 `searchScope`, `tab`, and `recentMonthCount` define the initial selection. Library options are read from the embedded `library-data` JSON in `index.html`, so no separate JSON request is required when opening the page directly.
 

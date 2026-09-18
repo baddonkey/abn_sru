@@ -1,12 +1,13 @@
 (function () {
   "use strict";
 
-  function buildRecentMonthCodes(prefixes, monthCount) {
+  function buildRecentMonthCodes(prefixes, monthCount, startOffset) {
     const codes = [];
     const today = new Date();
     const totalMonths = Math.max(monthCount || 0, 0);
+    const firstOffset = Math.max(startOffset || 0, 0);
 
-    for (let offset = 0; offset < totalMonths; offset += 1) {
+    for (let offset = firstOffset; offset < firstOffset + totalMonths; offset += 1) {
       const date = new Date(today.getFullYear(), today.getMonth() - offset, 1);
       const year = String(date.getFullYear()).slice(-2);
       const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -41,7 +42,11 @@
     let query = config.query;
 
     if (config.accessionPrefix) {
-      const codes = buildRecentMonthCodes([config.accessionPrefix], config.recentMonthCount || 1);
+      const codes = buildRecentMonthCodes(
+        [config.accessionPrefix],
+        config.recentMonthCount || 1,
+        config.recentMonthStartOffset || 0
+      );
       const wildcard = config.accessionPrefix.includes("*");
 
       query = codes
@@ -451,7 +456,8 @@
     const monthCodes = config.accessionPrefix
       ? buildRecentMonthCodes(
         [config.accessionPrefix],
-        config.recentMonthCount || 1
+        config.recentMonthCount || 1,
+        config.recentMonthStartOffset || 0
       )
       : [];
     const aggregateQuery = monthCodes.length > 1 ? resolveQuery(config) : "";

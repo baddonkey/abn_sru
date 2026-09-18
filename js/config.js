@@ -4,6 +4,7 @@ window.SRU_CONFIG = {
   vid: "41SLSP_ABN:ABN",
   searchScope: "",
   tab: "",
+  recentMonthStartOffset: 0,
   recentMonthCount: 1,
   query: "",
   recordSchema: "marcxml",
